@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class MonstruoPersecucion : MonoBehaviour
@@ -22,7 +23,9 @@ public class MonstruoPersecucion : MonoBehaviour
 
     [Header("PATRULLA")]
     [SerializeField] private bool patrullarTodoElNavMesh = true;       // si no, patrulla cerca de donde está
-    [SerializeField] private float radioPatrulla = 15f;                // solo si lo de arriba está desactivado
+    [SerializeField] private bool soloMismoPiso = true;                // no elige destinos en otros pisos
+    [SerializeField] private float toleranciaAlturaPatrulla = 1.5f;    // diferencia de altura que cuenta como "mismo piso"
+    [SerializeField] private float radioPatrulla = 15f;                // solo si patrullarTodoElNavMesh está desactivado
     [SerializeField] private float distanciaMinimaNuevoDestino = 4f;   // evita destinos pegados
     [SerializeField] private float distanciaLlegadaPatrulla = 1f;
     [SerializeField] private float pausaMinima = 1f;                   // espera al llegar a un punto
@@ -36,6 +39,10 @@ public class MonstruoPersecucion : MonoBehaviour
 
     [Header("DETECCIÓN")]
     [SerializeField] private float radioDeteccion = 15f;
+    [SerializeField] private float diferenciaAlturaMaxima = 1.5f;      // máx. diferencia entre el suelo del jugador y el del monstruo
+    [SerializeField] private float alturaOjosEstimada = 1.6f;          // se usa si no encuentra suelo bajo el jugador
+    [SerializeField] private LayerMask capasSuelo = ~0;                // qué cuenta como suelo para medir la altura
+    [SerializeField] private float segundosParaPerderAlJugador = 3f;   // si el jugador se va a otro piso
 
 
     // =========================================================
@@ -101,6 +108,10 @@ public class MonstruoPersecucion : MonoBehaviour
     private bool estabaMirando = false;
     private bool jumpscareActivado = false;
 
+    // Piso del jugador
+    private bool ultimoMismoPiso = true;
+    private float tiempoFueraDePiso = 0f;
+
     // Patrulla
     private bool tieneDestinoPatrulla = false;
     private bool esperandoEnPatrulla = false;
@@ -112,8 +123,12 @@ public class MonstruoPersecucion : MonoBehaviour
     private bool usarTriangulacion = false;
     private Vector3[] navVertices;
     private int[] navIndices;
-    private float[] areasAcumuladas;
-    private float areaTotal = 0f;
+
+    // Triángulos del piso actual del monstruo (con área acumulada)
+    private int[] triangulosPiso;
+    private float[] areasPisoAcumuladas;
+    private float areaPisoTotal = 0f;
+    private float alturaPisoReferencia = 0f;
 
     // Para el debug del Animator
     private string estadoAnimPrevio = "";
@@ -231,17 +246,30 @@ public class MonstruoPersecucion : MonoBehaviour
             posicionJugador
         );
 
+        // ¿El jugador está en el mismo piso que el monstruo?
+        bool mismoPiso = JugadorEnMismoPiso();
+
+        if (mostrarDebug && mismoPiso != ultimoMismoPiso)
+        {
+            ultimoMismoPiso = mismoPiso;
+
+            Debug.Log(mismoPiso
+                ? "MONSTRUO: el jugador está en su mismo piso."
+                : "MONSTRUO: el jugador está en OTRO piso.");
+        }
+
         // ---------------------------------------------------------
         // DETECCIÓN
         // ---------------------------------------------------------
 
         if (!detectado)
         {
-            if (distancia <= radioDeteccion)
+            if (distancia <= radioDeteccion && mismoPiso)
             {
                 detectado = true;
                 esperandoEnPatrulla = false;
                 tieneDestinoPatrulla = false;
+                tiempoFueraDePiso = 0f;
 
                 // Rugido de la primera detección
                 if (audioMonstruo != null)
@@ -259,6 +287,26 @@ public class MonstruoPersecucion : MonoBehaviour
             else
             {
                 // Todavía no lo detecta → merodea
+                Patrullar();
+                return;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // SI EL JUGADOR SE FUE A OTRO PISO, LO PIERDE
+        // ---------------------------------------------------------
+
+        if (mismoPiso)
+        {
+            tiempoFueraDePiso = 0f;
+        }
+        else
+        {
+            tiempoFueraDePiso += Time.deltaTime;
+
+            if (tiempoFueraDePiso >= segundosParaPerderAlJugador)
+            {
+                PerderJugador();
                 Patrullar();
                 return;
             }
@@ -290,7 +338,62 @@ public class MonstruoPersecucion : MonoBehaviour
         }
 
         // Si no lo miran → perseguir
-        PerseguirJugador(posicionJugador, distancia);
+        PerseguirJugador(posicionJugador, distancia, mismoPiso);
+    }
+
+
+    // =========================================================
+    // ¿EL JUGADOR ESTÁ EN EL MISMO PISO?
+    // Compara el suelo bajo el jugador con el suelo del monstruo.
+    // =========================================================
+
+    private bool JugadorEnMismoPiso()
+    {
+        if (camaraJugador == null)
+            return false;
+
+        float sueloJugador;
+        RaycastHit hit;
+
+        if (Physics.Raycast(
+            camaraJugador.position,
+            Vector3.down,
+            out hit,
+            6f,
+            capasSuelo,
+            QueryTriggerInteraction.Ignore))
+        {
+            sueloJugador = hit.point.y;
+        }
+        else
+        {
+            // No hay suelo debajo: estimamos con la altura de los ojos
+            sueloJugador = camaraJugador.position.y - alturaOjosEstimada;
+        }
+
+        float diferencia = Mathf.Abs(sueloJugador - transform.position.y);
+
+        return diferencia <= diferenciaAlturaMaxima;
+    }
+
+
+    // =========================================================
+    // PERDER AL JUGADOR (vuelve a merodear)
+    // =========================================================
+
+    private void PerderJugador()
+    {
+        detectado = false;
+        estabaMirando = false;
+        tiempoFueraDePiso = 0f;
+
+        esperandoEnPatrulla = false;
+        tieneDestinoPatrulla = false;
+
+        agent.isStopped = false;
+
+        if (mostrarDebug)
+            Debug.Log("MONSTRUO: perdió al jugador (otro piso), vuelve a merodear.");
     }
 
 
@@ -389,7 +492,7 @@ public class MonstruoPersecucion : MonoBehaviour
     {
         tieneDestinoPatrulla = false;
 
-        const int intentos = 15;
+        const int intentos = 20;
 
         for (int i = 0; i < intentos; i++)
         {
@@ -432,7 +535,7 @@ public class MonstruoPersecucion : MonoBehaviour
             Debug.LogWarning("MONSTRUO PATRULLA: no se encontró un destino válido, reintentando.");
     }
 
-    // Prepara los triángulos del NavMesh para elegir puntos repartidos
+    // Guarda los triángulos del NavMesh para elegir puntos repartidos
     // de forma pareja por toda la zona azul.
     private void PrepararNavMesh()
     {
@@ -456,8 +559,29 @@ public class MonstruoPersecucion : MonoBehaviour
         navVertices = tri.vertices;
         navIndices = tri.indices;
 
+        ConstruirTriangulosDelPiso();
+
+        usarTriangulacion = areaPisoTotal > 0.01f;
+
+        if (!usarTriangulacion)
+        {
+            Debug.LogWarning(
+                "MONSTRUO: No se encontraron triángulos de NavMesh en su piso. " +
+                "Patrullará solo dentro del radio."
+            );
+        }
+    }
+
+    // Filtra los triángulos que están a la altura del monstruo
+    // (su piso) y calcula sus áreas acumuladas.
+    private void ConstruirTriangulosDelPiso()
+    {
+        alturaPisoReferencia = transform.position.y;
+
         int cantidad = navIndices.Length / 3;
-        areasAcumuladas = new float[cantidad];
+
+        List<int> triangulos = new List<int>();
+        List<float> acumuladas = new List<float>();
 
         float acumulado = 0f;
 
@@ -467,14 +591,28 @@ public class MonstruoPersecucion : MonoBehaviour
             Vector3 b = navVertices[navIndices[i * 3 + 1]];
             Vector3 c = navVertices[navIndices[i * 3 + 2]];
 
+            if (soloMismoPiso)
+            {
+                float alturaMedia = (a.y + b.y + c.y) / 3f;
+
+                if (Mathf.Abs(alturaMedia - alturaPisoReferencia) > toleranciaAlturaPatrulla)
+                    continue;
+            }
+
             float area = Vector3.Cross(b - a, c - a).magnitude * 0.5f;
 
+            if (area <= 0.0001f)
+                continue;
+
             acumulado += area;
-            areasAcumuladas[i] = acumulado;
+
+            triangulos.Add(i);
+            acumuladas.Add(acumulado);
         }
 
-        areaTotal = acumulado;
-        usarTriangulacion = areaTotal > 0.01f;
+        triangulosPiso = triangulos.ToArray();
+        areasPisoAcumuladas = acumuladas.ToArray();
+        areaPisoTotal = acumulado;
     }
 
     private bool ObtenerPuntoAleatorio(out Vector3 punto)
@@ -485,25 +623,38 @@ public class MonstruoPersecucion : MonoBehaviour
 
         if (usarTriangulacion)
         {
+            // Si el monstruo cambió de piso (por una escalera),
+            // recalculamos los triángulos de su nuevo piso.
+            if (soloMismoPiso &&
+                Mathf.Abs(transform.position.y - alturaPisoReferencia) > toleranciaAlturaPatrulla)
+            {
+                ConstruirTriangulosDelPiso();
+
+                if (areaPisoTotal <= 0.01f)
+                    return false;
+            }
+
             // Triángulo al azar (más probable cuanto más grande es)
-            float r = Random.value * areaTotal;
+            float r = Random.value * areaPisoTotal;
 
             int bajo = 0;
-            int alto = areasAcumuladas.Length - 1;
+            int alto = areasPisoAcumuladas.Length - 1;
 
             while (bajo < alto)
             {
                 int medio = (bajo + alto) / 2;
 
-                if (areasAcumuladas[medio] >= r)
+                if (areasPisoAcumuladas[medio] >= r)
                     alto = medio;
                 else
                     bajo = medio + 1;
             }
 
-            Vector3 a = navVertices[navIndices[bajo * 3]];
-            Vector3 b = navVertices[navIndices[bajo * 3 + 1]];
-            Vector3 c = navVertices[navIndices[bajo * 3 + 2]];
+            int triangulo = triangulosPiso[bajo];
+
+            Vector3 a = navVertices[navIndices[triangulo * 3]];
+            Vector3 b = navVertices[navIndices[triangulo * 3 + 1]];
+            Vector3 c = navVertices[navIndices[triangulo * 3 + 2]];
 
             // Punto al azar dentro del triángulo
             float r1 = Mathf.Sqrt(Random.value);
@@ -529,6 +680,12 @@ public class MonstruoPersecucion : MonoBehaviour
 
         if (NavMesh.SamplePosition(aleatorio, out hit, radioPatrulla, agent.areaMask))
         {
+            if (soloMismoPiso &&
+                Mathf.Abs(hit.position.y - transform.position.y) > toleranciaAlturaPatrulla)
+            {
+                return false;
+            }
+
             punto = hit.position;
             return true;
         }
@@ -543,7 +700,8 @@ public class MonstruoPersecucion : MonoBehaviour
 
     private void PerseguirJugador(
         Vector3 posicionJugador,
-        float distancia)
+        float distancia,
+        bool mismoPiso)
     {
         if (!agent.isOnNavMesh)
             return;
@@ -569,8 +727,8 @@ public class MonstruoPersecucion : MonoBehaviour
 
         agent.speed = velocidadCorrer;
 
-        // Alcanzó al jugador → JUMPSCARE
-        if (distancia <= distanciaJumpscare)
+        // Alcanzó al jugador (en su mismo piso) → JUMPSCARE
+        if (distancia <= distanciaJumpscare && mismoPiso)
         {
             ActivarJumpscare();
             return;
@@ -655,6 +813,7 @@ public class MonstruoPersecucion : MonoBehaviour
     // FORZAR IDLE
     // Si el Animator intenta irse a otro estado mientras el
     // monstruo está quieto, lo devuelve a Idle.
+    // (Solo se usa cuando lo están mirando, nunca al patrullar.)
     // =========================================================
 
     private void ForzarIdle()
