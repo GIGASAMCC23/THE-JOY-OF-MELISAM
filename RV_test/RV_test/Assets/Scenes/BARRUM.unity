@@ -7454,6 +7454,7 @@ GameObject:
   - component: {fileID: 1792859119}
   - component: {fileID: 1792859118}
   - component: {fileID: 1792859117}
+  - component: {fileID: 1792859123}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Player
@@ -7566,7 +7567,7 @@ Transform:
   m_GameObject: {fileID: 1792859116}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.121963106, z: -0, w: 0.99253464}
-  m_LocalPosition: {x: -2.957, y: 3.722, z: -5.584}
+  m_LocalPosition: {x: 17.238, y: 1.479, z: 13.212}
   m_LocalScale: {x: 0.82, y: 0.82, z: 0.82}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -7575,6 +7576,44 @@ Transform:
   - {fileID: 153342095}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -14.011, z: 0}
+--- !u!114 &1792859123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792859116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd34d5ccebd87424c9a158005764c241, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAudio
+  camara: {fileID: 1792859122}
+  monstruo: {fileID: 1907199745}
+  animatorMonstruo: {fileID: 1907199744}
+  pasos:
+  - {fileID: 8300000, guid: f4a70543b8090ef4dbeb217fb32846e3, type: 3}
+  respiracionPesada: {fileID: 8300000, guid: b926e5bfbfa64504f89576dcd9bfb806, type: 3}
+  pitidoMirada: {fileID: 8300000, guid: ce7207fdc1400184a98a4e856e27c3a4, type: 3}
+  sonidoJumpscare: {fileID: 8300000, guid: d482b197beab46c41abd3fb7dd430ff4, type: 3}
+  volumenGeneral: 1
+  volumenPasos: 0.404
+  distanciaPorPaso: 0.75
+  velocidadMinima: 0.25
+  velocidadMaximaValida: 8
+  variacionPitch: {x: 0.92, y: 1.08}
+  volumenMinimoRespiracion: 0.271
+  volumenMaximoRespiracion: 1
+  distanciaVolumenMinimo: 25
+  distanciaVolumenMaximo: 3
+  suavizadoRespiracion: 4.52
+  volumenPitido: 0.154
+  limiteMirada: 0.09
+  distanciaMaximaPitido: 10
+  velocidadSubidaPitido: 3
+  velocidadBajadaPitido: 2
+  volumenJumpscare: 1
+  nombreEstadoJumpscare: Jumpscare
 --- !u!1 &1798676606
 GameObject:
   m_ObjectHideFlags: 0
@@ -7758,15 +7797,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.92
+      value: -3.119
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.32
+      value: 3.428
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.92
+      value: -12.645
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
       propertyPath: m_LocalRotation.w
@@ -11131,6 +11170,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1907199751}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1907199753}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1907199752}
   m_SourcePrefab: {fileID: 100100000, guid: 45502e0e3f21a1c438350c32f770cf62, type: 3}
 --- !u!1 &1849494837
 GameObject:
@@ -11507,14 +11552,153 @@ MonoBehaviour:
   camaraJugador: {fileID: 1377140729}
   agent: {fileID: 1907199747}
   animator: {fileID: 1907199744}
+  audioMonstruo: {fileID: 0}
+  patrullarTodoElNavMesh: 1
+  radioPatrulla: 15
+  distanciaMinimaNuevoDestino: 4
+  distanciaLlegadaPatrulla: 1
+  pausaMinima: 1
+  pausaMaxima: 4
+  tiempoMaximoAtascado: 2
   radioDeteccion: 15
   velocidadCaminar: 1.5
   velocidadCorrer: 4.5
-  distanciaMinima: 2
+  jumpscare: {fileID: 0}
+  distanciaJumpscare: 1.5
   detenerseCuandoLoMiran: 1
   limiteMirada: 0.75
+  forzarIdleAlDetenerse: 1
+  nombreEstadoIdle: Idle
   frecuenciaActualizacion: 0.05
   mostrarDebug: 1
+--- !u!82 &1907199752
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1907199743}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &1907199753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1907199743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4772f5761c93b34080b2a6a0911bb81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterAudio
+  agent: {fileID: 0}
+  pasos:
+  - {fileID: 8300000, guid: 66c5d3bec8e706b4d9f4ee5c2df6e509, type: 3}
+  rugidoDeteccion: {fileID: 8300000, guid: 697de5a371212d8409ae0fe1f14093ba, type: 3}
+  respiracion: {fileID: 8300000, guid: 05a51471f5a050f4dabb08e8a1449469, type: 3}
+  sonidoJumpscare: {fileID: 8300000, guid: d482b197beab46c41abd3fb7dd430ff4, type: 3}
+  volumenPasos: 0.074
+  volumenRugido: 1
+  volumenRespiracion: 0.303
+  volumenJumpscare: 1
+  velocidadMinimaPasos: 0.2
+  umbralCorrer: 3
+  intervaloCaminar: 1
+  intervaloCorrer: 0.35
+  variacionPitch: {x: 0.9, y: 1.1}
+  distanciaMinima: 2
+  distanciaMaxima: 25
+  atenuacion: 1
+  jumpscareEn2D: 1
 --- !u!1 &1908133449
 GameObject:
   m_ObjectHideFlags: 0
