@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientSkyColor: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.28831434, g: 0.2894856, b: 0.2924528, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 5c0a64b402b98b84d92d372d881f346a, type: 2}
   m_HaloStrength: 0.5
@@ -5828,6 +5828,11 @@ GameObject:
   - component: {fileID: 1377140732}
   - component: {fileID: 1377140731}
   - component: {fileID: 1377140730}
+  - component: {fileID: 1377140734}
+  - component: {fileID: 1377140735}
+  - component: {fileID: 1377140737}
+  - component: {fileID: 1377140736}
+  - component: {fileID: 1377140738}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -6067,6 +6072,87 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1377140734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377140728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d54c6bfda817a46eb9d976719fd25909, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RGBShiftEffect
+  on: 1
+  amount: 0.0027
+  speed: 0
+  material: {fileID: 2100000, guid: 668e4ca5bbe07424e90bffec7dd41598, type: 2}
+--- !u!114 &1377140735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377140728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24866fd877eed4481a2d4cfd73bb2242, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BleachEffect
+  on: 1
+  strength: 1.35
+  material: {fileID: 2100000, guid: dabac87302b71472d89c8543b765eba8, type: 2}
+--- !u!114 &1377140736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377140728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4e2a4358e02d4f30bac5028d43ad851, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BadTVEffect
+  on: 1
+  thickDistort: 1.1
+  fineDistort: 1
+  material: {fileID: 2100000, guid: 0b2b1aef91c2345ab8d2fecf276fba3c, type: 2}
+--- !u!114 &1377140737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377140728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94e3e00c7db294d8489f45358437019e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PosterizeEffect
+  on: 1
+  level: 21
+  material: {fileID: 2100000, guid: 84da12828e118449c8833ae1aa31804d, type: 2}
+--- !u!114 &1377140738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377140728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88571dab8b35d4986bd57c94d47728a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScanlinesEffect
+  on: 1
+  grayscale: 0
+  amount: 800
+  strength: 0.9
+  noise: 1.07
+  speed: 5
+  material: {fileID: 2100000, guid: 34707840cacc149bbae1e03a783fcb40, type: 2}
 --- !u!1 &1412969401
 GameObject:
   m_ObjectHideFlags: 0
@@ -7455,6 +7541,7 @@ GameObject:
   - component: {fileID: 1792859118}
   - component: {fileID: 1792859117}
   - component: {fileID: 1792859123}
+  - component: {fileID: 1792859124}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Player
@@ -7614,6 +7701,25 @@ MonoBehaviour:
   velocidadBajadaPitido: 2
   volumenJumpscare: 1
   nombreEstadoJumpscare: Jumpscare
+--- !u!114 &1792859124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792859116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88571dab8b35d4986bd57c94d47728a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScanlinesEffect
+  on: 1
+  grayscale: 0
+  amount: 800
+  strength: 0.9
+  noise: 0.4
+  speed: 5
+  material: {fileID: 2100000, guid: 34707840cacc149bbae1e03a783fcb40, type: 2}
 --- !u!1 &1798676606
 GameObject:
   m_ObjectHideFlags: 0
@@ -11554,6 +11660,8 @@ MonoBehaviour:
   animator: {fileID: 1907199744}
   audioMonstruo: {fileID: 0}
   patrullarTodoElNavMesh: 1
+  soloMismoPiso: 1
+  toleranciaAlturaPatrulla: 1.5
   radioPatrulla: 15
   distanciaMinimaNuevoDestino: 4
   distanciaLlegadaPatrulla: 1
@@ -11561,6 +11669,12 @@ MonoBehaviour:
   pausaMaxima: 4
   tiempoMaximoAtascado: 2
   radioDeteccion: 15
+  diferenciaAlturaMaxima: 1.5
+  alturaOjosEstimada: 1.6
+  capasSuelo:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  segundosParaPerderAlJugador: 3
   velocidadCaminar: 1.5
   velocidadCorrer: 4.5
   jumpscare: {fileID: 0}
