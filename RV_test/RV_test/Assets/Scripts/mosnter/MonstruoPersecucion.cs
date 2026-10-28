@@ -65,10 +65,11 @@ public class MonstruoPersecucion : MonoBehaviour
     // =========================================================
 
     private bool detectado = false;
-
     private float siguienteActualizacion = 0f;
-
     private bool estabaMirando = false;
+
+    // Script de patrulla (se apaga al detectar al jugador)
+    private MonsterController patrulla;
 
 
     // =========================================================
@@ -78,14 +79,12 @@ public class MonstruoPersecucion : MonoBehaviour
     private void Awake()
     {
         if (agent == null)
-        {
             agent = GetComponent<NavMeshAgent>();
-        }
 
         if (animator == null)
-        {
             animator = GetComponentInChildren<Animator>();
-        }
+
+        patrulla = GetComponent<MonsterController>();
     }
 
 
@@ -95,10 +94,7 @@ public class MonstruoPersecucion : MonoBehaviour
 
     private void Start()
     {
-        // =====================================================
-        // BUSCAR MAIN CAMERA
-        // =====================================================
-
+        // Buscar Main Camera
         if (camaraJugador == null)
         {
             Camera cam = Camera.main;
@@ -108,74 +104,35 @@ public class MonstruoPersecucion : MonoBehaviour
                 camaraJugador = cam.transform;
 
                 if (mostrarDebug)
-                {
-                    Debug.Log(
-                        "MONSTRUO: Main Camera encontrada."
-                    );
-                }
+                    Debug.Log("MONSTRUO: Main Camera encontrada.");
             }
         }
 
-
-        // =====================================================
-        // EL OBJETIVO SERÁ LA CÁMARA
-        // =====================================================
-
+        // El objetivo será la cámara
         if (objetivoJugador == null)
-        {
             objetivoJugador = camaraJugador;
-        }
 
-
-        // =====================================================
-        // COMPROBACIONES
-        // =====================================================
-
+        // Comprobaciones
         if (camaraJugador == null)
-        {
-            Debug.LogError(
-                "MONSTRUO ERROR: No se encontró Main Camera."
-            );
-        }
+            Debug.LogError("MONSTRUO ERROR: No se encontró Main Camera.");
 
         if (agent == null)
         {
-            Debug.LogError(
-                "MONSTRUO ERROR: No tiene NavMeshAgent."
-            );
-
+            Debug.LogError("MONSTRUO ERROR: No tiene NavMeshAgent.");
             return;
         }
 
-
-        // =====================================================
-        // CONFIGURAR NAVMESH
-        // =====================================================
-
+        // Configurar NavMesh
         agent.speed = velocidadCaminar;
-
         agent.stoppingDistance = distanciaMinima;
-
         agent.isStopped = false;
-
         agent.updatePosition = true;
-
         agent.updateRotation = true;
-
-
-        // =====================================================
-        // ANIMACIÓN INICIAL
-        // =====================================================
 
         PonerIdle();
 
-
         if (mostrarDebug)
-        {
-            Debug.Log(
-                "MONSTRUO: Sistema de persecución iniciado correctamente."
-            );
-        }
+            Debug.Log("MONSTRUO: Sistema de persecución iniciado correctamente.");
     }
 
 
@@ -185,10 +142,6 @@ public class MonstruoPersecucion : MonoBehaviour
 
     private void Update()
     {
-        // =====================================================
-        // COMPROBACIONES
-        // =====================================================
-
         if (camaraJugador == null)
             return;
 
@@ -198,43 +151,29 @@ public class MonstruoPersecucion : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
+        // Posición real de la cámara, al mismo nivel que el monstruo
+        Vector3 posicionJugador = camaraJugador.position;
+        posicionJugador.y = transform.position.y;
 
-        // =====================================================
-        // POSICIÓN REAL DE LA CÁMARA
-        // =====================================================
+        float distancia = Vector3.Distance(
+            transform.position,
+            posicionJugador
+        );
 
-        Vector3 posicionJugador =
-            camaraJugador.position;
-
-
-        // =====================================================
-        // MANTENER AL MONSTRUO EN EL MISMO NIVEL
-        // =====================================================
-
-        posicionJugador.y =
-            transform.position.y;
-
-
-        // =====================================================
-        // DISTANCIA
-        // =====================================================
-
-        float distancia =
-            Vector3.Distance(
-                transform.position,
-                posicionJugador
-            );
-
-
-        // =====================================================
+        // ---------------------------------------------------------
         // DETECCIÓN
-        // =====================================================
+        // ---------------------------------------------------------
 
         if (!detectado)
         {
             if (distancia <= radioDeteccion)
             {
                 detectado = true;
+
+                // Apagamos la patrulla: durante la persecución
+                // este script es el único que maneja destino y Animator.
+                if (patrulla != null)
+                    patrulla.enabled = false;
 
                 if (mostrarDebug)
                 {
@@ -248,23 +187,15 @@ public class MonstruoPersecucion : MonoBehaviour
             else
             {
                 Caminar();
-
                 return;
             }
         }
 
-
-        // =====================================================
+        // ---------------------------------------------------------
         // ¿EL JUGADOR LO ESTÁ MIRANDO?
-        // =====================================================
+        // ---------------------------------------------------------
 
-        bool loEstaMirando =
-            EstaSiendoMirado();
-
-
-        // =====================================================
-        // CAMBIÓ EL ESTADO DE MIRADA
-        // =====================================================
+        bool loEstaMirando = EstaSiendoMirado();
 
         if (loEstaMirando != estabaMirando)
         {
@@ -272,45 +203,21 @@ public class MonstruoPersecucion : MonoBehaviour
 
             if (mostrarDebug)
             {
-                if (loEstaMirando)
-                {
-                    Debug.Log(
-                        "MONSTRUO → JUGADOR LO ESTÁ MIRANDO"
-                    );
-                }
-                else
-                {
-                    Debug.Log(
-                        "MONSTRUO → JUGADOR DEJÓ DE MIRARLO"
-                    );
-                }
+                Debug.Log(loEstaMirando
+                    ? "MONSTRUO → JUGADOR LO ESTÁ MIRANDO"
+                    : "MONSTRUO → JUGADOR DEJÓ DE MIRARLO");
             }
         }
 
-
-        // =====================================================
-        // SI LO ESTÁ MIRANDO
-        // =====================================================
-
-        if (
-            detenerseCuandoLoMiran &&
-            loEstaMirando
-        )
+        // Si lo miran → quieto
+        if (detenerseCuandoLoMiran && loEstaMirando)
         {
             DetenerMonstruo();
-
             return;
         }
 
-
-        // =====================================================
-        // SI NO LO ESTÁ MIRANDO → PERSEGUIR
-        // =====================================================
-
-        PerseguirJugador(
-            posicionJugador,
-            distancia
-        );
+        // Si no lo miran → perseguir
+        PerseguirJugador(posicionJugador, distancia);
     }
 
 
@@ -325,27 +232,13 @@ public class MonstruoPersecucion : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
-
-        // =====================================================
-        // ACTUALIZAR DESTINO
-        // =====================================================
-
+        // Actualizar el destino cada cierto tiempo
         if (Time.time >= siguienteActualizacion)
         {
             siguienteActualizacion =
-                Time.time +
-                frecuenciaActualizacion;
+                Time.time + frecuenciaActualizacion;
 
-
-            // ESTA ES LA PARTE MÁS IMPORTANTE
-            //
-            // El destino se obtiene de la CÁMARA
-            // cada 0.05 segundos.
-
-            agent.SetDestination(
-                posicionJugador
-            );
-
+            agent.SetDestination(posicionJugador);
 
             if (mostrarDebug)
             {
@@ -358,46 +251,24 @@ public class MonstruoPersecucion : MonoBehaviour
             }
         }
 
+        agent.speed = velocidadCorrer;
 
-        // =====================================================
-        // VELOCIDAD
-        // =====================================================
-
-        agent.speed =
-            velocidadCorrer;
-
-
-        // =====================================================
-        // DISTANCIA MÍNIMA
-        // =====================================================
-
+        // Muy cerca → se detiene
         if (distancia <= distanciaMinima)
         {
             agent.isStopped = true;
-
             PonerIdle();
-
             return;
         }
 
-
-        // =====================================================
-        // CONTINUAR MOVIÉNDOSE
-        // =====================================================
-
         agent.isStopped = false;
-
-
-        // =====================================================
-        // ANIMACIÓN
-        // =====================================================
 
         PonerCorrer();
     }
 
 
     // =========================================================
-    // CAMINAR
+    // CAMINAR (antes de detectar al jugador)
     // =========================================================
 
     private void Caminar()
@@ -405,34 +276,15 @@ public class MonstruoPersecucion : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
-
         agent.isStopped = false;
-
-        agent.speed =
-            velocidadCaminar;
-
+        agent.speed = velocidadCaminar;
 
         if (animator != null)
         {
-            animator.SetBool(
-                "IsChasing",
-                false
-            );
-
-            animator.SetBool(
-                "IsRunning",
-                false
-            );
-
-            animator.SetBool(
-                "IsPatrolling",
-                true
-            );
-
-            animator.SetBool(
-                "IsAttacking",
-                false
-            );
+            animator.SetBool("IsChasing", false);
+            animator.SetBool("IsRunning", false);
+            animator.SetBool("IsPatrolling", true);
+            animator.SetBool("IsAttacking", false);
         }
     }
 
@@ -446,26 +298,10 @@ public class MonstruoPersecucion : MonoBehaviour
         if (animator == null)
             return;
 
-
-        animator.SetBool(
-            "IsChasing",
-            false
-        );
-
-        animator.SetBool(
-            "IsRunning",
-            false
-        );
-
-        animator.SetBool(
-            "IsPatrolling",
-            false
-        );
-
-        animator.SetBool(
-            "IsAttacking",
-            false
-        );
+        animator.SetBool("IsChasing", false);
+        animator.SetBool("IsRunning", false);
+        animator.SetBool("IsPatrolling", false);
+        animator.SetBool("IsAttacking", false);
     }
 
 
@@ -478,26 +314,10 @@ public class MonstruoPersecucion : MonoBehaviour
         if (animator == null)
             return;
 
-
-        animator.SetBool(
-            "IsChasing",
-            true
-        );
-
-        animator.SetBool(
-            "IsRunning",
-            true
-        );
-
-        animator.SetBool(
-            "IsPatrolling",
-            false
-        );
-
-        animator.SetBool(
-            "IsAttacking",
-            false
-        );
+        animator.SetBool("IsChasing", true);
+        animator.SetBool("IsRunning", true);
+        animator.SetBool("IsPatrolling", false);
+        animator.SetBool("IsAttacking", false);
     }
 
 
@@ -510,9 +330,8 @@ public class MonstruoPersecucion : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
-
         agent.isStopped = true;
-
+        agent.velocity = Vector3.zero;
 
         PonerIdle();
     }
@@ -527,56 +346,26 @@ public class MonstruoPersecucion : MonoBehaviour
         if (camaraJugador == null)
             return false;
 
-
-        // =====================================================
-        // DIRECCIÓN CÁMARA → MONSTRUO
-        // =====================================================
-
         Vector3 direccion =
-            transform.position -
-            camaraJugador.position;
+            transform.position - camaraJugador.position;
 
-
-        float distancia =
-            direccion.magnitude;
-
+        float distancia = direccion.magnitude;
 
         if (distancia <= 0.01f)
             return true;
 
-
         direccion.Normalize();
 
+        float punto = Vector3.Dot(
+            camaraJugador.forward,
+            direccion
+        );
 
-        // =====================================================
-        // PRODUCTO PUNTO
-        // =====================================================
-
-        float punto =
-            Vector3.Dot(
-                camaraJugador.forward,
-                direccion
-            );
-
-
-        // =====================================================
-        // NO ESTÁ MIRANDO
-        // =====================================================
-
+        // Fuera del campo de visión
         if (punto < limiteMirada)
-        {
             return false;
-        }
 
-
-        // =====================================================
-        // IMPORTANTE:
-        // AQUÍ NO DEPENDEMOS DEL RAYCAST.
-        //
-        // Si la cámara está apuntando directamente
-        // al monstruo, lo consideramos mirado.
-        // =====================================================
-
+        // Si la cámara apunta al monstruo, lo consideramos mirado
         return true;
     }
 
@@ -588,7 +377,6 @@ public class MonstruoPersecucion : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-
 
         Gizmos.DrawWireSphere(
             transform.position,

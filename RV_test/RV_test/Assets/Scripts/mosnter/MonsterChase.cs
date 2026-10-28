@@ -25,6 +25,8 @@ public class MonsterChase : MonoBehaviour
     [SerializeField] private float rotationSpeed = 8f;
 
     private bool isChasing = false;
+    private bool wasLooked = false;
+    private MonsterController patrol;
 
     private void Awake()
     {
@@ -33,16 +35,15 @@ public class MonsterChase : MonoBehaviour
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+
+        patrol = GetComponent<MonsterController>();
     }
 
     private void Start()
     {
         if (agent == null)
         {
-            Debug.LogError(
-                "MONSTRUO: No tiene NavMeshAgent."
-            );
-
+            Debug.LogError("MONSTRUO: No tiene NavMeshAgent.");
             return;
         }
 
@@ -64,26 +65,22 @@ public class MonsterChase : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
-        // =====================================================
-        // ¿EL JUGADOR ESTÁ MIRANDO AL MONSTRUO?
-        // =====================================================
-
+        // ¿El jugador está mirando al monstruo?
         bool playerIsLooking = IsPlayerLookingAtMonster();
 
-        // =====================================================
-        // EL JUGADOR LO MIRA
-        // =====================================================
+        if (playerIsLooking != wasLooked)
+        {
+            wasLooked = playerIsLooking;
+            Debug.Log(playerIsLooking
+                ? "MONSTRUO ESTÁ SIENDO MIRADO → QUIETO"
+                : "MONSTRUO YA NO ESTÁ SIENDO MIRADO → PERSIGUE");
+        }
 
         if (playerIsLooking)
         {
             StopMonster();
-
             return;
         }
-
-        // =====================================================
-        // EL JUGADOR NO LO MIRA
-        // =====================================================
 
         ChasePlayer();
     }
@@ -98,38 +95,16 @@ public class MonsterChase : MonoBehaviour
             return;
 
         agent.isStopped = false;
-
         agent.speed = runSpeed;
         agent.stoppingDistance = stoppingDistance;
 
-        // =====================================================
-        // IMPORTANTE
-        // =====================================================
-        //
-        // NO guardamos una posición.
-        //
-        // Cada frame obtenemos la posición ACTUAL
-        // del jugador.
-        //
-        // Por eso si el jugador se mueve:
-        //
-        // jugador → nueva posición
-        // monstruo → nuevo destino
-        //
-        // =====================================================
-
+        // Cada frame se toma la posición ACTUAL del jugador.
         Vector3 currentPlayerPosition = player.position;
 
-        // No queremos que el monstruo intente subir
-        // hasta la altura de la cabeza VR.
+        // El monstruo no intenta subir a la altura de la cabeza VR.
         currentPlayerPosition.y = transform.position.y;
 
-        // Actualizar el destino continuamente.
         agent.SetDestination(currentPlayerPosition);
-
-        // =====================================================
-        // ANIMACIÓN
-        // =====================================================
 
         if (animator != null)
         {
@@ -137,10 +112,6 @@ public class MonsterChase : MonoBehaviour
             animator.SetBool("IsRunning", true);
             animator.SetBool("IsPatrolling", false);
         }
-
-        // =====================================================
-        // ORIENTACIÓN
-        // =====================================================
 
         RotateTowardsMovement();
     }
@@ -152,7 +123,6 @@ public class MonsterChase : MonoBehaviour
     private void RotateTowardsMovement()
     {
         Vector3 direction = agent.velocity;
-
         direction.y = 0f;
 
         if (direction.sqrMagnitude < 0.01f)
@@ -178,18 +148,19 @@ public class MonsterChase : MonoBehaviour
             return;
 
         player = target;
-
         isChasing = true;
+
+        // Apagamos la patrulla para que no pelee con la persecución
+        // (destinos aleatorios y parámetros del Animator).
+        if (patrol != null)
+            patrol.enabled = false;
 
         if (agent == null)
             return;
 
         if (!agent.isOnNavMesh)
         {
-            Debug.LogError(
-                "MONSTRUO: El NavMeshAgent no está sobre el NavMesh."
-            );
-
+            Debug.LogError("MONSTRUO: El NavMeshAgent no está sobre el NavMesh.");
             return;
         }
 
@@ -197,10 +168,8 @@ public class MonsterChase : MonoBehaviour
         agent.speed = runSpeed;
         agent.stoppingDistance = stoppingDistance;
 
-        // Primer destino.
-        // Después ChasePlayer() lo actualizará continuamente.
+        // Primer destino. Después ChasePlayer() lo actualiza continuamente.
         Vector3 initialPosition = player.position;
-
         initialPosition.y = transform.position.y;
 
         agent.SetDestination(initialPosition);
@@ -216,7 +185,7 @@ public class MonsterChase : MonoBehaviour
     }
 
     // =========================================================
-    // DETENER MONSTRUO
+    // DETENER MONSTRUO (cuando lo miran)
     // =========================================================
 
     private void StopMonster()
@@ -225,20 +194,12 @@ public class MonsterChase : MonoBehaviour
             return;
 
         agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
-        // No hacemos ResetPath().
-        //
-        // Así, cuando el jugador deje de mirar,
-        // podemos continuar la persecución inmediatamente.
+        // No hacemos ResetPath(): así, cuando el jugador deje de mirar,
+        // la persecución continúa de inmediato.
 
-        if (animator != null)
-        {
-            animator.SetBool("IsRunning", false);
-            animator.SetBool("IsChasing", false);
-            animator.SetBool("IsPatrolling", false);
-        }
-
-        Debug.Log("MONSTRUO ESTÁ SIENDO MIRADO → QUIETO");
+        SetIdleAnimation();
     }
 
     // =========================================================
@@ -248,6 +209,7 @@ public class MonsterChase : MonoBehaviour
     public void StopChase()
     {
         isChasing = false;
+        wasLooked = false;
 
         if (agent != null)
         {
@@ -255,6 +217,10 @@ public class MonsterChase : MonoBehaviour
             agent.ResetPath();
             agent.speed = walkSpeed;
         }
+
+        // Volvemos a encender la patrulla.
+        if (patrol != null)
+            patrol.enabled = true;
 
         SetIdleAnimation();
 
@@ -288,8 +254,7 @@ public class MonsterChase : MonoBehaviour
             return false;
 
         Vector3 directionToMonster =
-            transform.position -
-            playerCamera.transform.position;
+            transform.position - playerCamera.transform.position;
 
         directionToMonster.Normalize();
 
@@ -298,41 +263,33 @@ public class MonsterChase : MonoBehaviour
             directionToMonster
         );
 
-        // Si el valor es suficientemente alto,
-        // el monstruo está dentro del campo de visión.
+        // Fuera del campo de visión.
         if (dot < lookThreshold)
             return false;
 
-        // =====================================================
-        // RAYCAST
-        // =====================================================
-        //
-        // Esto evita que el monstruo se considere "mirado"
-        // si hay una pared entre el jugador y el monstruo.
-        //
-
+        // Raycast: evita que cuente como "mirado" si hay una pared en medio.
+        // Ignora los triggers (por ejemplo, las manos del player en Is Trigger).
         Ray ray = new Ray(
             playerCamera.transform.position,
             directionToMonster
         );
-
-        RaycastHit hit;
 
         float distance = Vector3.Distance(
             playerCamera.transform.position,
             transform.position
         );
 
+        RaycastHit hit;
+
         if (Physics.Raycast(
             ray,
             out hit,
-            distance
-        ))
+            distance,
+            ~0,
+            QueryTriggerInteraction.Ignore))
         {
-            if (
-                hit.transform == transform ||
-                hit.transform.IsChildOf(transform)
-            )
+            if (hit.transform == transform ||
+                hit.transform.IsChildOf(transform))
             {
                 return true;
             }
@@ -362,10 +319,6 @@ public class MonsterChase : MonoBehaviour
             return;
 
         Gizmos.color = Color.yellow;
-
-        Gizmos.DrawLine(
-            transform.position,
-            player.position
-        );
+        Gizmos.DrawLine(transform.position, player.position);
     }
 }
