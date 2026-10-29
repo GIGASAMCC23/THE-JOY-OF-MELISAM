@@ -9608,7 +9608,7 @@ MonoBehaviour:
   pitidoMirada: {fileID: 8300000, guid: ce7207fdc1400184a98a4e856e27c3a4, type: 3}
   sonidoJumpscare: {fileID: 8300000, guid: d482b197beab46c41abd3fb7dd430ff4, type: 3}
   volumenGeneral: 1
-  volumenPasos: 0.404
+  volumenPasos: 0.835
   distanciaPorPaso: 0.75
   velocidadMinima: 0.25
   velocidadMaximaValida: 8
@@ -9618,11 +9618,11 @@ MonoBehaviour:
   distanciaVolumenMinimo: 25
   distanciaVolumenMaximo: 3
   suavizadoRespiracion: 4.52
-  volumenPitido: 0.154
-  limiteMirada: 0.09
-  distanciaMaximaPitido: 10
-  velocidadSubidaPitido: 3
-  velocidadBajadaPitido: 2
+  volumenPitido: 0.09
+  limiteMirada: 0.186
+  distanciaMaximaPitido: 20
+  velocidadSubidaPitido: 4
+  velocidadBajadaPitido: 6
   volumenJumpscare: 1
   nombreEstadoJumpscare: Jumpscare
 --- !u!114 &1792859124
@@ -9641,7 +9641,7 @@ MonoBehaviour:
   grayscale: 0
   amount: 800
   strength: 0.9
-  noise: 0.4
+  noise: 1.8
   speed: 5
   material: {fileID: 2100000, guid: 34707840cacc149bbae1e03a783fcb40, type: 2}
 --- !u!1 &1798676606
