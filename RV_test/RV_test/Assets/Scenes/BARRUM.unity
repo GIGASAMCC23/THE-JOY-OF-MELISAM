@@ -2713,10 +2713,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonPuzzleManager
   window: {fileID: 1402624368}
-  totalButtons: 3
   closedX: -0.393
   openX: 0.398
   openDuration: 2
+  totalButtons: 3
 --- !u!4 &600470574
 Transform:
   m_ObjectHideFlags: 0
@@ -7518,7 +7518,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -7719,14 +7719,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377140728}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d54c6bfda817a46eb9d976719fd25909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RGBShiftEffect
   on: 1
-  amount: 0.0027
-  speed: 0
+  amount: 0.0144
+  speed: 1.86
   material: {fileID: 2100000, guid: 668e4ca5bbe07424e90bffec7dd41598, type: 2}
 --- !u!114 &1377140735
 MonoBehaviour:
@@ -7735,13 +7735,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377140728}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24866fd877eed4481a2d4cfd73bb2242, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BleachEffect
   on: 1
-  strength: 1.35
+  strength: 1.67
   material: {fileID: 2100000, guid: dabac87302b71472d89c8543b765eba8, type: 2}
 --- !u!114 &1377140736
 MonoBehaviour:
@@ -7750,14 +7750,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377140728}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c4e2a4358e02d4f30bac5028d43ad851, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BadTVEffect
   on: 1
-  thickDistort: 1.1
-  fineDistort: 1
+  thickDistort: 4.84
+  fineDistort: 1.31
   material: {fileID: 2100000, guid: 0b2b1aef91c2345ab8d2fecf276fba3c, type: 2}
 --- !u!114 &1377140737
 MonoBehaviour:
@@ -7766,13 +7766,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377140728}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94e3e00c7db294d8489f45358437019e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PosterizeEffect
   on: 1
-  level: 21
+  level: 138
   material: {fileID: 2100000, guid: 84da12828e118449c8833ae1aa31804d, type: 2}
 --- !u!114 &1377140738
 MonoBehaviour:
@@ -7781,7 +7781,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377140728}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88571dab8b35d4986bd57c94d47728a1, type: 3}
   m_Name: 
@@ -7790,7 +7790,7 @@ MonoBehaviour:
   grayscale: 0
   amount: 800
   strength: 0.9
-  noise: 1.07
+  noise: 1.54
   speed: 5
   material: {fileID: 2100000, guid: 34707840cacc149bbae1e03a783fcb40, type: 2}
 --- !u!4 &1402624368 stripped

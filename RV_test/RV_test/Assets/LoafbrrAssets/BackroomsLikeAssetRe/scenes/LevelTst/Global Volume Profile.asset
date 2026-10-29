@@ -250,7 +250,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.41
+    m_Value: -1
   xMultiplier:
     m_OverrideState: 1
     m_Value: 1
@@ -262,7 +262,7 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   scale:
     m_OverrideState: 1
-    m_Value: 4.48
+    m_Value: 4.11
 --- !u!114 &-4272956866095101508
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -397,7 +397,7 @@ MonoBehaviour:
     dimension: 1
   dirtIntensity:
     m_OverrideState: 1
-    m_Value: 96.35
+    m_Value: 39.2
 --- !u!114 &6238856565193112011
 MonoBehaviour:
   m_ObjectHideFlags: 3
