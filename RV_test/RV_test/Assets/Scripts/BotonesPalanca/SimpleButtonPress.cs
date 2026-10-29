@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class SimpleButtonPress : MonoBehaviour
@@ -12,8 +13,14 @@ public class SimpleButtonPress : MonoBehaviour
     [SerializeField] private float detectionDistance = 0.25f;
     [SerializeField] private float pressDepth = 0.026f;
 
-    [Header("Logica del puzzle")]
+    [Header("Bloqueo (opcional)")]
+    [SerializeField] private SimpleLeverPress requiredLever;   // si lo asignas, el botón no funciona hasta activar esa palanca
+
+    [Header("Logica del puzzle (opcional)")]
     [SerializeField] private ButtonPuzzleManager puzzleManager;
+
+    [Header("Eventos")]
+    [SerializeField] private UnityEvent onPressed;             // al presionarse (cambiar de escena, sonido, etc.)
 
     private Vector3 initialLocalPosition;
     private bool pressed;
@@ -26,11 +33,11 @@ public class SimpleButtonPress : MonoBehaviour
         else
             Debug.LogWarning($"[BOTÓN] '{name}' no tiene Button Visual asignado.");
 
-        if (puzzleManager == null)
+        if (puzzleManager == null && onPressed.GetPersistentEventCount() == 0)
         {
             Debug.LogWarning(
-                $"[BOTÓN] '{name}' NO tiene ButtonPuzzleManager asignado: " +
-                "al presionarlo no avisará a la ventana."
+                $"[BOTÓN] '{name}' no tiene ButtonPuzzleManager ni eventos en On Pressed: " +
+                "al presionarlo no pasará nada."
             );
         }
     }
@@ -40,9 +47,30 @@ public class SimpleButtonPress : MonoBehaviour
         if (pressed || buttonVisual == null)
             return;
 
+        bool click =
+            Mouse.current != null &&
+            Mouse.current.leftButton.wasPressedThisFrame;
+
         bool leftNear = IsHandNear(leftHand);
         bool rightNear = IsHandNear(rightHand);
         bool handIsNear = leftNear || rightNear;
+
+        // ¿Está bloqueado por una palanca?
+        bool bloqueado = requiredLever != null && !requiredLever.IsActivated;
+
+        if (bloqueado)
+        {
+            if (handIsNear && click)
+            {
+                Debug.Log(
+                    $"[BOTÓN] '{name}' bloqueado: primero hay que activar la palanca " +
+                    $"'{requiredLever.name}'."
+                );
+            }
+
+            handWasNear = handIsNear;
+            return;
+        }
 
         // Avisar cuando la mano entra en el rango del boton.
         if (handIsNear && !handWasNear)
@@ -51,12 +79,8 @@ public class SimpleButtonPress : MonoBehaviour
         handWasNear = handIsNear;
 
         // Solo presionar cuando la mano esta cerca y haces clic.
-        if (handIsNear &&
-            Mouse.current != null &&
-            Mouse.current.leftButton.wasPressedThisFrame)
-        {
+        if (handIsNear && click)
             PressButton();
-        }
     }
 
     private bool IsHandNear(Transform hand)
@@ -89,12 +113,8 @@ public class SimpleButtonPress : MonoBehaviour
 
             puzzleManager.ButtonPressed();
         }
-        else
-        {
-            Debug.LogError(
-                $"[BOTÓN] '{name}' no pudo avisar: falta arrastrar el ButtonPuzzleManager " +
-                "al campo Puzzle Manager."
-            );
-        }
+
+        // Eventos del Inspector (cambiar de escena, sonido, etc.)
+        onPressed.Invoke();
     }
 }

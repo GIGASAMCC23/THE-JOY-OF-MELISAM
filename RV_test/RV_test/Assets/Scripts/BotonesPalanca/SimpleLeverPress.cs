@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class SimpleLeverPress : MonoBehaviour
@@ -15,9 +16,12 @@ public class SimpleLeverPress : MonoBehaviour
     [SerializeField] private float activationAngle = -50f;
     [SerializeField] private float rotationDuration = 0.3f;
 
-    [Header("Lógica del juego")]
-    [SerializeField] private ButtonPuzzleManager puzzleManager;   // la palanca solo funciona con la ventana abierta
-    [SerializeField] private GameWinManager gameWinManager;       // lleva a la escena final
+    [Header("Lógica del juego (opcional)")]
+    [SerializeField] private ButtonPuzzleManager puzzleManager;   // si lo asignas, la palanca solo funciona con la ventana abierta
+    [SerializeField] private GameWinManager gameWinManager;       // si lo asignas, lleva a la escena final
+
+    [Header("Eventos")]
+    [SerializeField] private UnityEvent onActivated;              // al terminar de girar (luz, sonido, etc.)
 
     [Header("Debug")]
     [SerializeField] private bool mostrarDebug = true;
@@ -25,7 +29,11 @@ public class SimpleLeverPress : MonoBehaviour
     private Renderer[] leverRenderers;
     private Quaternion initialRotation;
     private bool activated;
+    private bool completed;
     private bool handWasNear;
+
+    // Otros scripts (por ejemplo, el botón) consultan esto
+    public bool IsActivated => completed;
 
     private void Start()
     {
@@ -80,16 +88,16 @@ public class SimpleLeverPress : MonoBehaviour
         if (leftHand == null && rightHand == null)
             Debug.LogWarning("[PALANCA] No hay ninguna mano asignada (Left Hand / Right Hand).");
 
-        if (puzzleManager == null)
+        if (puzzleManager == null && mostrarDebug)
+            Debug.Log("[PALANCA] Sin ButtonPuzzleManager: no depende de ninguna ventana.");
+
+        if (gameWinManager == null && onActivated.GetPersistentEventCount() == 0)
         {
             Debug.LogWarning(
-                "[PALANCA] No tiene ButtonPuzzleManager asignado: " +
-                "funcionará aunque la ventana esté cerrada."
+                "[PALANCA] No tiene GameWinManager ni eventos en On Activated: " +
+                "al activarla no pasará nada."
             );
         }
-
-        if (gameWinManager == null)
-            Debug.LogWarning("[PALANCA] Falta asignar el GameWinManager.");
 
         if (Mouse.current == null)
             Debug.LogWarning("[PALANCA] No se detecta ningún mouse (Mouse.current es null).");
@@ -104,7 +112,7 @@ public class SimpleLeverPress : MonoBehaviour
             Mouse.current != null &&
             Mouse.current.leftButton.wasPressedThisFrame;
 
-        // Bloqueada hasta que la ventana termine de abrirse
+        // Bloqueada hasta que la ventana termine de abrirse (solo si hay puzzle)
         if (puzzleManager != null && !puzzleManager.IsOpen)
         {
             if (click && mostrarDebug)
@@ -237,9 +245,14 @@ public class SimpleLeverPress : MonoBehaviour
 
         leverVisual.localRotation = targetRotation;
 
+        completed = true;
+
         Debug.Log("[PALANCA] ¡Palanca activada!");
 
-        // Al terminar de girar → victoria / escena final
+        // Eventos del Inspector (luz, sonido, etc.)
+        onActivated.Invoke();
+
+        // Victoria / escena final (solo si está asignado)
         if (gameWinManager != null)
             gameWinManager.Win();
     }

@@ -119,6 +119,52 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &43466779
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 43466781}
+  - component: {fileID: 43466780}
+  m_Layer: 0
+  m_Name: CambioDeEscena
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &43466780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43466779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ecb88820c966dc498f0b22880c7dd6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CambioDeEscena
+  escenaDestino: VIDEO
+  retardo: 0.5
+--- !u!4 &43466781
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43466779}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.58212, y: -0, z: -6.31918}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &159840944
 GameObject:
   m_ObjectHideFlags: 0
@@ -1782,8 +1828,46 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 653ffcc17a457e84b97031709b19037b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 997638220}
   m_SourcePrefab: {fileID: 100100000, guid: 653ffcc17a457e84b97031709b19037b, type: 3}
+--- !u!1 &997638218 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 653ffcc17a457e84b97031709b19037b, type: 3}
+  m_PrefabInstance: {fileID: 997638217}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &997638219 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6624324225981693718, guid: 653ffcc17a457e84b97031709b19037b, type: 3}
+  m_PrefabInstance: {fileID: 997638217}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &997638220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997638218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 551d3af5228de404a97065aba3f2301c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleLeverPress
+  leftHand: {fileID: 1013135881}
+  rightHand: {fileID: 990011505}
+  leverVisual: {fileID: 997638219}
+  interactionPoint: {fileID: 997638219}
+  detectionDistance: 1
+  activationAngle: -50
+  rotationDuration: 0.3
+  puzzleManager: {fileID: 0}
+  gameWinManager: {fileID: 0}
+  onActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  mostrarDebug: 1
 --- !u!1 &1013135880
 GameObject:
   m_ObjectHideFlags: 0
@@ -2270,8 +2354,55 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3aa02d2b81bf7d8448b84d359857cd99, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1717443173}
   m_SourcePrefab: {fileID: 100100000, guid: 3aa02d2b81bf7d8448b84d359857cd99, type: 3}
+--- !u!1 &1717443171 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3aa02d2b81bf7d8448b84d359857cd99, type: 3}
+  m_PrefabInstance: {fileID: 1717443170}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1717443172 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2262112375414930884, guid: 3aa02d2b81bf7d8448b84d359857cd99, type: 3}
+  m_PrefabInstance: {fileID: 1717443170}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1717443173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717443171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9071ae45f1035de44afe05730c7f4f83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleButtonPress
+  leftHand: {fileID: 1013135881}
+  rightHand: {fileID: 990011505}
+  buttonVisual: {fileID: 1717443172}
+  detectionDistance: 1
+  pressDepth: 0.026
+  requiredLever: {fileID: 997638220}
+  puzzleManager: {fileID: 0}
+  onPressed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 43466780}
+        m_TargetAssemblyTypeName: CambioDeEscena, Assembly-CSharp
+        m_MethodName: Cargar
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1819421484
 GameObject:
   m_ObjectHideFlags: 0
@@ -3057,3 +3188,4 @@ SceneRoots:
   - {fileID: 222263172}
   - {fileID: 997638217}
   - {fileID: 1717443170}
+  - {fileID: 43466781}
