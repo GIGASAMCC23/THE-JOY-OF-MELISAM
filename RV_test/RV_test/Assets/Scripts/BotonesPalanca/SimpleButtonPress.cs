@@ -1,5 +1,4 @@
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class SimpleButtonPress : MonoBehaviour
@@ -24,6 +23,16 @@ public class SimpleButtonPress : MonoBehaviour
     {
         if (buttonVisual != null)
             initialLocalPosition = buttonVisual.localPosition;
+        else
+            Debug.LogWarning($"[BOTÓN] '{name}' no tiene Button Visual asignado.");
+
+        if (puzzleManager == null)
+        {
+            Debug.LogWarning(
+                $"[BOTÓN] '{name}' NO tiene ButtonPuzzleManager asignado: " +
+                "al presionarlo no avisará a la ventana."
+            );
+        }
     }
 
     private void Update()
@@ -37,7 +46,7 @@ public class SimpleButtonPress : MonoBehaviour
 
         // Avisar cuando la mano entra en el rango del boton.
         if (handIsNear && !handWasNear)
-            Debug.Log(gameObject.name + "list0");
+            Debug.Log($"[BOTÓN] '{name}' listo (mano cerca).");
 
         handWasNear = handIsNear;
 
@@ -69,9 +78,23 @@ public class SimpleButtonPress : MonoBehaviour
         pressedPosition.y -= pressDepth;
         buttonVisual.localPosition = pressedPosition;
 
-        Debug.Log(gameObject.name + " presionado");
+        Debug.Log($"[BOTÓN] '{name}' presionado.");
 
         if (puzzleManager != null)
+        {
+            Debug.Log(
+                $"[BOTÓN] '{name}' → avisando al manager " +
+                $"'{ButtonPuzzleManager.Ruta(puzzleManager.transform)}'."
+            );
+
             puzzleManager.ButtonPressed();
+        }
+        else
+        {
+            Debug.LogError(
+                $"[BOTÓN] '{name}' no pudo avisar: falta arrastrar el ButtonPuzzleManager " +
+                "al campo Puzzle Manager."
+            );
+        }
     }
 }

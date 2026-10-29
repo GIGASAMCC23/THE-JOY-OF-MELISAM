@@ -2697,6 +2697,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34da6a7ab9ea64a48bd5398815e5a881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameWinManager
+  cargarEscenaFinal: 1
+  escenaFinal: FINAL
+  retardoAntesDeCargar: 1.5
   onWin:
     m_PersistentCalls:
       m_Calls: []
@@ -2712,11 +2715,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 239af9b960bcdf84f9f814b99bf89c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonPuzzleManager
+  openMode: 0
   window: {fileID: 1402624368}
+  extraObjectsToHide: []
+  hideDelay: 0
   closedX: -0.393
   openX: 0.398
   openDuration: 2
   totalButtons: 3
+  mostrarDebug: 1
 --- !u!4 &600470574
 Transform:
   m_ObjectHideFlags: 0
@@ -7399,9 +7406,13 @@ MonoBehaviour:
   leftHand: {fileID: 1421367292}
   rightHand: {fileID: 731633553}
   leverVisual: {fileID: 2018047686}
-  detectionDistance: 0.4
+  interactionPoint: {fileID: 2018047686}
+  detectionDistance: 1
   activationAngle: -50
   rotationDuration: 0.3
+  puzzleManager: {fileID: 600470573}
+  gameWinManager: {fileID: 600470572}
+  mostrarDebug: 1
 --- !u!65 &1372055727
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9465,7 +9476,6 @@ GameObject:
   - component: {fileID: 1792859118}
   - component: {fileID: 1792859117}
   - component: {fileID: 1792859123}
-  - component: {fileID: 1792859124}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Player
@@ -9480,7 +9490,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1792859116}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4cd661dd3f7ccfd46bdae6596537a81f, type: 3}
   m_Name: 
@@ -9625,25 +9635,6 @@ MonoBehaviour:
   velocidadBajadaPitido: 6
   volumenJumpscare: 1
   nombreEstadoJumpscare: Jumpscare
---- !u!114 &1792859124
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1792859116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88571dab8b35d4986bd57c94d47728a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScanlinesEffect
-  on: 1
-  grayscale: 0
-  amount: 800
-  strength: 0.9
-  noise: 1.8
-  speed: 5
-  material: {fileID: 2100000, guid: 34707840cacc149bbae1e03a783fcb40, type: 2}
 --- !u!1 &1798676606
 GameObject:
   m_ObjectHideFlags: 0
