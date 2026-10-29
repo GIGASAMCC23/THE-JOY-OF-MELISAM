@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -11,17 +12,22 @@ public class SimpleLeverPress : MonoBehaviour
 
     [Header("Palanca")]
     [SerializeField] private Transform leverVisual;
-    [SerializeField] private Transform interactionPoint;      // opcional: punto exacto donde se "agarra"
-    [SerializeField] private float detectionDistance = 0.4f;  // se mide hasta la malla de la palanca
+    [SerializeField] private Transform interactionPoint;
+    [SerializeField] private float detectionDistance = 0.4f;
     [SerializeField] private float activationAngle = -50f;
     [SerializeField] private float rotationDuration = 0.3f;
 
-    [Header("Lógica del juego (opcional)")]
-    [SerializeField] private ButtonPuzzleManager puzzleManager;   // si lo asignas, la palanca solo funciona con la ventana abierta
-    [SerializeField] private GameWinManager gameWinManager;       // si lo asignas, lleva a la escena final
+    [Header("Logica del juego (opcional)")]
+    [SerializeField] private ButtonPuzzleManager puzzleManager;
+    [SerializeField] private GameWinManager gameWinManager;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip activationSound;
+    [SerializeField, Range(0f, 1f)] private float volume = 1f;
 
     [Header("Eventos")]
-    [SerializeField] private UnityEvent onActivated;              // al terminar de girar (luz, sonido, etc.)
+    [SerializeField] private UnityEvent onActivated;
 
     [Header("Debug")]
     [SerializeField] private bool mostrarDebug = true;
@@ -32,7 +38,6 @@ public class SimpleLeverPress : MonoBehaviour
     private bool completed;
     private bool handWasNear;
 
-    // Otros scripts (por ejemplo, el botón) consultan esto
     public bool IsActivated => completed;
 
     private void Start()
@@ -47,26 +52,27 @@ public class SimpleLeverPress : MonoBehaviour
             if (ObtenerBounds(out b))
             {
                 Debug.Log(
-                    $"[PALANCA] '{leverVisual.name}' | centro de la malla: {b.center} | " +
-                    $"tamaño: {b.size} | pivote: {leverVisual.position} | " +
-                    $"distancia pivote-centro: {Vector3.Distance(leverVisual.position, b.center):F2} m"
+                    $"[PALANCA] '{leverVisual.name}' | centro: {b.center} | " +
+                    $"tamaño: {b.size} | pivote: {leverVisual.position}"
                 );
 
-                float mayor = Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
+                float mayor = Mathf.Max(
+                    b.size.x,
+                    Mathf.Max(b.size.y, b.size.z)
+                );
 
                 if (mayor > 3f)
                 {
                     Debug.LogWarning(
                         $"[PALANCA] La malla de '{leverVisual.name}' mide {mayor:F1} m. " +
-                        "Si Lever Visual es un grupo grande, la detección será demasiado amplia: " +
-                        "asigna solo la manija o usa Interaction Point."
+                        "Asigna solo la manija o utiliza Interaction Point."
                     );
                 }
             }
             else
             {
                 Debug.LogWarning(
-                    $"[PALANCA] '{leverVisual.name}' no tiene Renderers: la distancia se medirá al pivote."
+                    $"[PALANCA] '{leverVisual.name}' no tiene Renderers."
                 );
             }
 
@@ -74,8 +80,7 @@ public class SimpleLeverPress : MonoBehaviour
             if (leverVisual.gameObject.isStatic)
             {
                 Debug.LogWarning(
-                    $"[PALANCA] '{leverVisual.name}' está marcado como Static: aunque el código " +
-                    "la gire, el dibujo NO se moverá. Desmarca Static en ese objeto."
+                    $"[PALANCA] '{leverVisual.name}' está marcado como Static."
                 );
             }
 #endif
@@ -86,21 +91,20 @@ public class SimpleLeverPress : MonoBehaviour
         }
 
         if (leftHand == null && rightHand == null)
-            Debug.LogWarning("[PALANCA] No hay ninguna mano asignada (Left Hand / Right Hand).");
+            Debug.LogWarning("[PALANCA] No hay ninguna mano asignada.");
 
         if (puzzleManager == null && mostrarDebug)
-            Debug.Log("[PALANCA] Sin ButtonPuzzleManager: no depende de ninguna ventana.");
+            Debug.Log("[PALANCA] Sin ButtonPuzzleManager.");
 
         if (gameWinManager == null && onActivated.GetPersistentEventCount() == 0)
         {
             Debug.LogWarning(
-                "[PALANCA] No tiene GameWinManager ni eventos en On Activated: " +
-                "al activarla no pasará nada."
+                "[PALANCA] No tiene GameWinManager ni eventos en On Activated."
             );
         }
 
         if (Mouse.current == null)
-            Debug.LogWarning("[PALANCA] No se detecta ningún mouse (Mouse.current es null).");
+            Debug.LogWarning("[PALANCA] No se detecta ningún mouse.");
     }
 
     private void Update()
@@ -112,15 +116,10 @@ public class SimpleLeverPress : MonoBehaviour
             Mouse.current != null &&
             Mouse.current.leftButton.wasPressedThisFrame;
 
-        // Bloqueada hasta que la ventana termine de abrirse (solo si hay puzzle)
         if (puzzleManager != null && !puzzleManager.IsOpen)
         {
             if (click && mostrarDebug)
-            {
-                Debug.Log(
-                    "[PALANCA] Click ignorado: la ventana todavía no está abierta (IsOpen = false)."
-                );
-            }
+                Debug.Log("[PALANCA] La ventana todavía no está abierta.");
 
             return;
         }
@@ -136,10 +135,9 @@ public class SimpleLeverPress : MonoBehaviour
         if (click && !handIsNear && mostrarDebug)
         {
             Debug.Log(
-                $"[PALANCA] Click ignorado: ninguna mano está a ≤ {detectionDistance} m de la palanca. " +
-                $"Distancia a la malla → izq: {DistanciaALaPalanca(leftHand):F2} | der: {DistanciaALaPalanca(rightHand):F2}  " +
-                $"(al pivote → izq: {DistanciaAlPivote(leftHand):F2} | der: {DistanciaAlPivote(rightHand):F2}). " +
-                "Un valor de 999 significa mano sin asignar."
+                $"[PALANCA] Ninguna mano está a la distancia requerida. " +
+                $"Izquierda: {DistanciaALaPalanca(leftHand):F2} m | " +
+                $"Derecha: {DistanciaALaPalanca(rightHand):F2} m."
             );
         }
 
@@ -150,13 +148,12 @@ public class SimpleLeverPress : MonoBehaviour
         }
     }
 
-    // =========================================================
-    // DISTANCIAS
-    // =========================================================
-
     private bool ObtenerBounds(out Bounds bounds)
     {
-        bounds = new Bounds(leverVisual != null ? leverVisual.position : Vector3.zero, Vector3.zero);
+        bounds = new Bounds(
+            leverVisual != null ? leverVisual.position : Vector3.zero,
+            Vector3.zero
+        );
 
         if (leverRenderers == null || leverRenderers.Length == 0)
             return false;
@@ -182,7 +179,6 @@ public class SimpleLeverPress : MonoBehaviour
         return !primero;
     }
 
-    // Distancia de la mano hasta la palanca (hasta su malla, no su pivote)
     private float DistanciaALaPalanca(Transform hand)
     {
         if (hand == null)
@@ -194,7 +190,10 @@ public class SimpleLeverPress : MonoBehaviour
         Bounds b;
 
         if (ObtenerBounds(out b))
-            return Vector3.Distance(hand.position, b.ClosestPoint(hand.position));
+            return Vector3.Distance(
+                hand.position,
+                b.ClosestPoint(hand.position)
+            );
 
         return Vector3.Distance(hand.position, leverVisual.position);
     }
@@ -215,10 +214,6 @@ public class SimpleLeverPress : MonoBehaviour
         return DistanciaALaPalanca(hand) <= detectionDistance;
     }
 
-    // =========================================================
-    // GIRO DE LA PALANCA
-    // =========================================================
-
     private IEnumerator RotateLever()
     {
         Quaternion startRotation = leverVisual.localRotation;
@@ -237,8 +232,11 @@ public class SimpleLeverPress : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / rotationDuration);
             t = Mathf.SmoothStep(0f, 1f, t);
 
-            leverVisual.localRotation =
-                Quaternion.Slerp(startRotation, targetRotation, t);
+            leverVisual.localRotation = Quaternion.Slerp(
+                startRotation,
+                targetRotation,
+                t
+            );
 
             yield return null;
         }
@@ -249,17 +247,14 @@ public class SimpleLeverPress : MonoBehaviour
 
         Debug.Log("[PALANCA] ¡Palanca activada!");
 
-        // Eventos del Inspector (luz, sonido, etc.)
+        if (audioSource != null && activationSound != null)
+            audioSource.PlayOneShot(activationSound, volume);
+
         onActivated.Invoke();
 
-        // Victoria / escena final (solo si está asignado)
         if (gameWinManager != null)
             gameWinManager.Win();
     }
-
-    // =========================================================
-    // PRUEBAS (clic derecho en el nombre del componente, en play)
-    // =========================================================
 
     [ContextMenu("Probar palanca")]
     private void ProbarPalanca()
@@ -275,16 +270,14 @@ public class SimpleLeverPress : MonoBehaviour
     private void MostrarDistancias()
     {
         Debug.Log(
-            $"[PALANCA] Distancia a la malla → izq: {DistanciaALaPalanca(leftHand):F2} | " +
-            $"der: {DistanciaALaPalanca(rightHand):F2}  " +
-            $"(al pivote → izq: {DistanciaAlPivote(leftHand):F2} | der: {DistanciaAlPivote(rightHand):F2})  " +
-            $"| límite: {detectionDistance}"
+            $"[PALANCA] Distancia a la malla → izq: " +
+            $"{DistanciaALaPalanca(leftHand):F2} | der: " +
+            $"{DistanciaALaPalanca(rightHand):F2} | " +
+            $"al pivote → izq: {DistanciaAlPivote(leftHand):F2} | " +
+            $"der: {DistanciaAlPivote(rightHand):F2} | " +
+            $"límite: {detectionDistance}"
         );
     }
-
-    // =========================================================
-    // GIZMOS: ver la zona de detección en la ventana Scene
-    // =========================================================
 
     private void OnDrawGizmosSelected()
     {
@@ -301,18 +294,22 @@ public class SimpleLeverPress : MonoBehaviour
         for (int i = 1; i < rs.Length; i++)
             b.Encapsulate(rs[i].bounds);
 
-        // Verde: la malla de la palanca
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(b.center, b.size);
 
-        // Amarillo: zona donde la mano cuenta como "cerca"
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(b.center, b.size + Vector3.one * detectionDistance * 2f);
+        Gizmos.DrawWireCube(
+            b.center,
+            b.size + Vector3.one * detectionDistance * 2f
+        );
 
         if (interactionPoint != null)
         {
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(interactionPoint.position, detectionDistance);
+            Gizmos.DrawWireSphere(
+                interactionPoint.position,
+                detectionDistance
+            );
         }
     }
 }
